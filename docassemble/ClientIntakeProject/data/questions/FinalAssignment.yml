@@ -1,0 +1,238 @@
+objects:
+  - client: Individual
+  - pres: Individual
+  - board: Individual
+  - contact: Individual
+  - sign: Individual
+  - contacter: Individual
+---
+mandatory: True
+code: |
+  intro
+  part_one
+  client.name.first
+  organization_type
+  pres.name.first
+  board.name.first
+  contact.name.first
+  sign.name.first
+  board_vote
+  if board_vote:
+    user_vote
+  part_two
+  serp_people.gather()
+  part_three
+  policy_assign
+  part_four
+  special_type
+  download_template
+---
+metadata:
+  title: |
+    Client Intake Form
+  short title: |
+    Client Intake
+  authors:
+    - name: Briana McCarthy
+  documentation: "https://docassemble.org/docs/initial.html#metadata"
+  logo: |
+    <img src="/packagestatic/docassemble.ClientIntake/SLlogo.png" style="max-height:1.9em;"/> <h3>Client Intake Form</h3>
+---
+features:
+  question back button: True
+  # https://www.bootstrapcdn.com/bootswatch
+  bootstrap theme: https://stackpath.bootstrapcdn.com/bootswatch/4.4.1/cosmo/bootstrap.min.css
+---
+interview help:
+  label: Help
+  heading: About this interview
+  content: |
+    This interview was written by a law student who participated in the Lawyering in the Age of Smart Machines Class, Spring 2020 at Suffolk University Law School.
+    
+    [FILE https://upload.wikimedia.org/wikipedia/en/thumb/c/c7/Suffolk_University_coat_of_arms.svg/1280px-Suffolk_University_coat_of_arms.svg.png]
+    
+    [About our class](https://nonprofittechy.github.io/docassemble-class/docs/classes/2020-law-smart-machines).
+---
+modules:
+  - .simplify
+---
+question: |
+   This interview will help you complete the intake form for Sherin and Lodgen's SERP program.
+continue button field: intro
+---
+question: |
+  Part 1 of 4: Employer Information
+field: part_one
+---
+question: |
+  Employer Information
+fields:
+  - First name: client.name.first
+  - Last name: client.name.last
+  - Street address: client.address.address
+    address autocomplete: True
+  - Unit: client.address.unit
+    required: False
+  - City: client.address.city
+  - State: client.address.state
+  - Zip: client.address.zip
+---
+question: |
+  What type of organization is your company?
+fields:
+  - "Select the type of organization": organization_type
+    datatype: checkboxes
+    choices:
+      - Non Profit
+      - For Profit
+---
+question: |
+  Direct Contact Information for President/CEO:
+fields:
+  - First Name: pres.name.first
+  - Last name: pres.name.last
+  - E-mail: pres.email
+---
+question: |
+  Direct Contact Information for Board Chair:
+fields:
+  - First name: board.name.first
+  - Last name: board.name.last
+  - E-mail: board.email
+---
+question: |
+  Contact person at Employer who will work with Sherin and Lodgen LLP on this engagement
+subquestion: |
+  (Should not be executive receiving the CASD SERP, or officer subordinate to SERP recipient):  
+fields:
+  - First name: contact.name.first
+  - Last name: contact.name.last
+  - E-mail: contact.email
+---
+question: |
+  Person who will sign documents on behalf of the Employer (name/title)
+subquestion: |
+  (NOTE: Cannot be executive receiving SERP or subordinate of SERP recipient): 
+fields:
+  - First name: sign.name.first
+  - Last name: sign.name.last
+  - E-mail: sign.email
+--- 
+question: |
+  Has the Board of Directors voted on any aspects of the proposed SERP arrangement?
+yesno: board_vote
+---
+question: |
+   Please attach copies of votes to this questionnaire.
+fields:
+  - Files: user_vote
+    datatype: files
+---
+question: |
+  Part 2 of 4: Personal Information For Person(s) To Be Covered By Program:
+field: part_two
+---
+objects: 
+  - serp_people: DAList.using(object_type=Individual,there_are_any=True,complete_attribute='serp_complete')
+---
+code: |
+  serp_people[i].name.first
+  serp_people[i].employment_contract
+  serp_people[i].board_directors
+  serp_people[i].employer_board
+  serp_people[i].attorney_name_first
+  serp_people[i].serp_complete=True
+---
+question: |
+  Please complete one copy for each person receiving a SERP: 
+list collect: True
+fields:
+  - Full Name: serp_people[i].name.first
+  - Title: serp_people[i].title
+  - Home Address: serp_people[i].fulladdress
+  - Phone: serp_people[i].phone_number
+  - Email: serp_people[i].email
+  - Name of Insured, if different: serp_people[i].insured_name
+    required: false
+  - Relationship: serp_people[i].relationship
+    required: false
+---
+question: |
+  Does ${serp_people[i]} have any of the following agreement/arrangements with the Employer: 
+subquestion: |
+  (Note: copies of agreement below needed only to insure that new SERP agreement does not conflict.
+fields:
+  - "Employment/Other Services Contract?": serp_people[i].employment_contract
+    datatype: yesnoradio
+  - "Non-Competition/Non-Solicitation Contract?": serp_people[i].noncompete_contract
+    datatype: yesnoradio
+  - "Deferred Comp Plan?": serp_people[i].deferred_contract
+    datatype: yesnoradio 
+  - "Is there a plan, in connection with the new SERP arrangement, to enter into any new employment/personal services, non-competition/non-solicitation and/or other deferred compensation agreement/plan?": serp_people[i].new_employment_contract
+    datatype: yesnoradio
+  - "Any deferred compensation plan being terminated in connection with this new SERP?": serp_people[i].comp_plan
+    datatype: yesnoradio
+---
+question: |
+  Is ${serp_people[i]} a member of the Employer's Board of Directors?
+yesno: serp_people[i].board_directors
+---
+question: | 
+  Is spouse/relative a member of the Employer Board?
+yesno: serp_people[i].employer_board
+---
+question: |
+ Will ${serp_people[i]}’s personal attorney represent them in connection with the new SERP arrangement? 
+subquestion: |
+  If so, please provide contact information for him/her (we encourage consultation with a personal attorney in this matter, as Sherin and Lodgen LLP will be representing the Employer and not the employee personally in connection with the SERP):
+fields:
+  - Attorney Name: serp_people[i].attorney_name_first
+  - Address: serp_people[i].attorney_address
+  - Office Phone: serp_people[i].attorney_phone
+  - Office Fax Phone: serp_people[i].attorney_fax
+  - Email: serp_people[i].attorney_email
+---
+question: |
+  Part 3 of 4: Information About The Specific Insurance Policy Included in this Program
+field: part_three
+---
+question: |
+  Information About The Specific Insurance Policy Included in this Program:
+fields:
+  - Date Original Policy Assignment was signed: policy_assign
+  - Issuing Insurance Company: insurance_company
+  - Policy Number: policy_number
+  - Policy Date: policy_date
+  - Policy Initial Face Amount: policy_amount
+  - Initial Premium: initial_premium
+  - Schedule of Annual Premiums to be paid by Employer, by year and amount (if OTHER than 10 annual payments): annual_premium
+---
+question: |
+  Part 4 of 4: Information About Pre-Funding of the Life Insurance Premiums Included in this Program
+field: part_four
+---
+question: |
+  Special Pre-Funding Arrangements – Will the SERP life insurance policy premiums be pre-funded in any way? 
+subquestion: |
+  If so, depending on the details of those arrangements, additional documents and related fees may apply.
+fields:
+  - "Check those boxes below that apply:": special_type
+    datatype: checkboxes
+    choices:
+      - Policy Premiums will be pre-funded by an annuity or other investment owned by the Employer.   In this case, no special legal work is required in documenting the SERP. 
+      - Policy Premiums will be pre-funded by a lump sum deposit of cash advanced by the Employer into a separate account owned with a third party (including the insurer).  In this case, special legal work may be required to ensure that the Employer has a properly documented lien or other possessory interest on the separate pre-funding cash account.  Sherin and Lodgen LLP will charge an additional flat fee of $1,000 to document such a cash pre-funded SERP, unless the Employer/other Employer attorney documents those collateral arrangements itself.
+      - There are other arrangements, not described above, to pre-fund the SERP(s).  Sherin and Lodgen LLP will consult with the Employer to determine if it will be expected to provide services related to such special arrangements, and charge a separate fee for those special services based on the time required to do that special work.
+---
+attachment:
+  name: Split Dollar Template
+  variable name: Split_Dollar_Template
+  docx template file: Split_Dollar_Templatedraft.docx
+  file name: Split Dollar Template
+---
+event: download_template
+question: Your document is ready.
+attachment:
+  - name: A *Split Dollar* document
+    filename: Split_Dollar_Templatedraft
+    content file: Split_Dollar_Templatedraft.md
+mandatory: True
